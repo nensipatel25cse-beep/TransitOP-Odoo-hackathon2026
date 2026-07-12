@@ -44,10 +44,10 @@ backdrop-filter: blur(20px);
 border: 1px solid rgba(255,255,255,0.25);
 box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
 }
-.service-card {
+.service-card, .deliverable-card, .bonus-card {
 transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.service-card:hover {
+.service-card:hover, .deliverable-card:hover, .bonus-card:hover {
 transform: translateY(-8px);
 box-shadow: 0 20px 40px -15px rgb(0 0 0 / 0.2);
 }
@@ -63,8 +63,21 @@ transition: opacity 0.6s ease, transform 0.6s ease;
 opacity: 1;
 transform: translateY(0);
 }
+.rule-card, .entity-card {
+transition: all 0.3s ease;
+}
+.rule-card:hover, .entity-card:hover {
+transform: translateY(-4px);
+box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+.workflow-step {
+transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.workflow-step:hover {
+transform: translateY(-6px);
+}
 @media (prefers-reduced-motion: reduce) {
-  .service-card, .scroll-reveal {
+  .service-card, .deliverable-card, .bonus-card, .scroll-reveal, .rule-card, .workflow-step, .entity-card {
     transition: none !important;
     transform: none !important;
     opacity: 1 !important;
@@ -88,17 +101,21 @@ transform: translateY(0);
 <a href="#" class="nav-link hover:text-[#EF9F27]">Home</a>
 <a href="#" class="nav-link hover:text-[#EF9F27]">About Us</a>
 <a href="#services" class="nav-link hover:text-[#EF9F27]">Services</a>
+<a href="#workflow" class="nav-link hover:text-[#EF9F27]">Workflow</a>
+<a href="#rules" class="nav-link hover:text-[#EF9F27]">Business Rules</a>
+<a href="#entities" class="nav-link hover:text-[#EF9F27]">Database Entities</a>
+<a href="#deliverables" class="nav-link hover:text-[#EF9F27]">Deliverables</a>
+<a href="#bonus" class="nav-link hover:text-[#EF9F27]">Bonus Features</a>
 <a href="#" class="nav-link hover:text-[#EF9F27]">Projects</a>
 <a href="#" class="nav-link hover:text-[#EF9F27]">Contact</a>
-<a href="#" class="nav-link hover:text-[#EF9F27]">Pricing</a>
-<a href="#" class="nav-link hover:text-[#EF9F27]">Dashboard</a>
+<a href="#" onclick="showDemoDashboard()" class="nav-link hover:text-[#EF9F27]">Demo Dashboard</a>
 </div>
 <div class="flex items-center gap-4">
 <button onclick="toggleDarkMode()" aria-label="Toggle dark mode" class="p-3 rounded-2xl hover:bg-white/10 transition">
 <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
 </button>
-<button onclick="requestQuote()" class="bg-[#D85A30] hover:bg-[#BA7517] text-white px-8 py-3 rounded-2xl font-semibold transition">
-                        Get Quote
+<button onclick="requestQuote()" class="bg-[#D85A30] hover:bg-[#BA7517] text-white px-8 py-3 rounded-2xl font-semibold transition" href="signin.html">
+Sign in
 </button>
 <button id="mobile-menu-btn" aria-label="Open menu" class="md:hidden text-3xl p-2">
 <i class="fa-solid fa-bars"></i>
@@ -112,44 +129,48 @@ transform: translateY(0);
 <a href="#" class="nav-link py-2">Home</a>
 <a href="#" class="nav-link py-2">About Us</a>
 <a href="#services" class="nav-link py-2">Services</a>
-<a href="#" class="nav-link py-2">Projects</a>
-<a href="#" class="nav-link py-2">Contact</a>
+<a href="#workflow" class="nav-link py-2">Workflow</a>
+<a href="#rules" class="nav-link py-2">Business Rules</a>
+<a href="#entities" class="nav-link py-2">Database Entities</a>
+<a href="#deliverables" class="nav-link py-2">Deliverables</a>
+<a href="#bonus" class="nav-link py-2">Bonus Features</a>
+<a href="#" onclick="showDemoDashboard()" class="nav-link py-2">Demo Dashboard</a>
 </div>
 </div>
 </header>
+
 <!-- HERO -->
 <section class="hero-bg min-h-screen flex items-center relative text-white overflow-hidden">
 <div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-0 grid md:grid-cols-2 gap-12 items-center min-h-[calc(100vh-80px)]">
 <div class="space-y-8 scroll-reveal">
 <div class="inline-flex items-center gap-2 glass px-6 py-3 rounded-3xl text-sm">
 <span class="w-2 h-2 bg-[#EF9F27] rounded-full animate-pulse"></span>
-                    Trusted Worldwide
+Trusted Worldwide
 </div>
 <h1 class="text-5xl sm:text-6xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
-                    Moving the World<br>with <span class="text-[#EF9F27]">Speed &amp; Trust</span>
+Moving the World<br>with <span class="text-[#EF9F27]">Speed &amp; Trust</span>
 </h1>
 <p class="text-lg md:text-xl text-[#E6F1FB] max-w-lg">
-                    Reliable global logistics powered by technology, integrity, and a fleet that never stops.
+Reliable global logistics powered by technology, integrity, and a fleet that never stops.
 </p>
 <div class="flex flex-col sm:flex-row gap-4">
 <button onclick="exploreMore()" class="bg-[#D85A30] hover:bg-[#BA7357] px-10 py-5 rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-3">
-                        Explore Solutions
+Explore Solutions
 <i class="fa-solid fa-arrow-right"></i>
+</button>
+<button onclick="showDemoDashboard()" class="border border-white/70 hover:bg-white/10 px-8 py-5 rounded-2xl font-semibold text-lg transition">
+View Live Rules Engine
 </button>
 </div>
 </div>
 <div class="hidden md:flex justify-end relative scroll-reveal">
 <div class="glass-frame rounded-3xl p-4 max-w-md">
-<img
-src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=1200&auto=format&fit=crop"
-alt="Transport truck on a highway"
-class="rounded-2xl w-full h-80 object-cover"
-loading="lazy"
->
+<img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=1200&auto=format&fit=crop" alt="Transport truck on a highway" class="rounded-2xl w-full h-80 object-cover" loading="lazy">
 </div>
 </div>
 </div>
 </section>
+
 <!-- SERVICES -->
 <section id="services" class="py-20 md:py-24 bg-white dark:bg-[#0F2338]">
 <div class="max-w-7xl mx-auto px-6 lg:px-8">
@@ -186,6 +207,137 @@ loading="lazy"
 </div>
 </div>
 </section>
+
+<!-- WORKFLOW -->
+<section id="workflow" class="py-20 bg-white dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#042C53] text-white text-sm font-medium px-6 py-2 rounded-full mb-4">HOW IT WORKS</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Step-by-Step Workflow</h2>
+<p class="mt-4 text-lg text-[#666] dark:text-[#B4B2A9] max-w-2xl mx-auto">See how our system enforces mandatory business rules at every stage of a trip.</p>
+</div>
+<div class="max-w-5xl mx-auto space-y-12">
+  <!-- Step 1 -->
+  <div class="workflow-step flex flex-col md:flex-row gap-8 items-center bg-[#F8F5EE] dark:bg-[#12283F] rounded-3xl p-8">
+    <div class="md:w-1/4 text-center">
+      <div class="w-16 h-16 mx-auto bg-[#042C53] text-white rounded-2xl flex items-center justify-center text-3xl font-bold">1</div>
+      <h3 class="mt-6 text-xl font-semibold">Create Trip Request</h3>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg">Dispatcher enters cargo details, selects vehicle and driver. System automatically validates:</p>
+      <ul class="mt-4 space-y-2 text-sm">
+        <li class="flex items-center gap-2"><span class="text-emerald-600">✓</span> Vehicle registration is unique</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-600">✓</span> Vehicle is Available (not In Shop/Retired)</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-600">✓</span> Driver license is valid and not suspended</li>
+      </ul>
+    </div>
+  </div>
+  <!-- Step 2 -->
+  <div class="workflow-step flex flex-col md:flex-row gap-8 items-center bg-[#F8F5EE] dark:bg-[#12283F] rounded-3xl p-8">
+    <div class="md:w-1/4 text-center">
+      <div class="w-16 h-16 mx-auto bg-[#042C53] text-white rounded-2xl flex items-center justify-center text-3xl font-bold">2</div>
+      <h3 class="mt-6 text-xl font-semibold">Validate Load</h3>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg">System checks cargo weight against vehicle capacity (Rule 5).</p>
+      <div class="mt-6 bg-white dark:bg-[#1A324F] p-6 rounded-2xl">
+        <p class="font-medium">Example: Cargo = 800kg | Vehicle Capacity = 1200kg → <span class="text-emerald-600 font-semibold">Approved</span></p>
+      </div>
+    </div>
+  </div>
+  <!-- Step 3 -->
+  <div class="workflow-step flex flex-col md:flex-row gap-8 items-center bg-[#F8F5EE] dark:bg-[#12283F] rounded-3xl p-8">
+    <div class="md:w-1/4 text-center">
+      <div class="w-16 h-16 mx-auto bg-[#042C53] text-white rounded-2xl flex items-center justify-center text-3xl font-bold">3</div>
+      <h3 class="mt-6 text-xl font-semibold">Dispatch Trip</h3>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg">On successful validation, trip is dispatched and statuses updated automatically (Rule 6).</p>
+      <div class="mt-4 p-4 border-l-4 border-[#D85A30] bg-white/70 dark:bg-black/30">
+        Vehicle &amp; Driver status changed to <strong>On Trip</strong>
+      </div>
+    </div>
+  </div>
+  <!-- Step 4 -->
+  <div class="workflow-step flex flex-col md:flex-row gap-8 items-center bg-[#F8F5EE] dark:bg-[#12283F] rounded-3xl p-8">
+    <div class="md:w-1/4 text-center">
+      <div class="w-16 h-16 mx-auto bg-[#042C53] text-white rounded-2xl flex items-center justify-center text-3xl font-bold">4</div>
+      <h3 class="mt-6 text-xl font-semibold">Trip Execution &amp; Completion</h3>
+    </div>
+    <div class="flex-1">
+      <p class="text-lg">Upon delivery, trip is marked complete → statuses restored to Available (Rule 7).</p>
+      <button onclick="simulateDispatch()" class="mt-6 px-8 py-3 bg-[#042C53] text-white rounded-2xl text-sm font-medium hover:bg-[#0C447C]">
+        Simulate Full Workflow
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- DATABASE ENTITIES -->
+<section id="entities" class="py-20 bg-[#F8F5EE] dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#042C53] text-white text-sm font-medium px-6 py-2 rounded-full mb-4">SYSTEM ARCHITECTURE</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Core Database Entities</h2>
+<p class="mt-4 text-lg text-[#666] dark:text-[#B4B2A9] max-w-2xl mx-auto">Key data models that power TransitFlow's operations and business rules enforcement.</p>
+</div>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="entities-container">
+<!-- Populated by JS -->
+</div>
+</div>
+</section>
+
+<!-- MANDATORY DELIVERABLES -->
+<section id="deliverables" class="py-20 bg-white dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#042C53] text-white text-sm font-medium px-6 py-2 rounded-full mb-4">PROJECT DELIVERABLES</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Mandatory Deliverables</h2>
+<p class="mt-4 text-lg text-[#666] dark:text-[#B4B2A9] max-w-2xl mx-auto">Key features and capabilities included in the TransitFlow platform.</p>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="deliverables-container">
+<!-- Populated by JS -->
+</div>
+</div>
+</section>
+
+<!-- BONUS FEATURES -->
+<section id="bonus" class="py-20 bg-[#F8F5EE] dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#042C53] text-white text-sm font-medium px-6 py-2 rounded-full mb-4">PREMIUM ADD-ONS</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Bonus Features</h2>
+<p class="mt-4 text-lg text-[#666] dark:text-[#B4B2A9] max-w-2xl mx-auto">Advanced capabilities that take your logistics operations to the next level.</p>
+</div>
+
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="bonus-container">
+<!-- Populated by JS -->
+</div>
+</div>
+</section>
+
+<!-- MANDATORY BUSINESS RULES -->
+<section id="rules" class="py-20 bg-white dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#042C53] text-white text-sm font-medium px-6 py-2 rounded-full mb-4">COMPLIANCE FIRST</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Mandatory Business Rules</h2>
+<p class="mt-4 text-lg text-[#666] dark:text-[#B4B2A9] max-w-2xl mx-auto">Our operations are governed by strict, automated business rules to ensure safety, efficiency, and regulatory compliance.</p>
+</div>
+<div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto" id="rules-container">
+<!-- Rules populated by JS -->
+</div>
+<div class="mt-16 text-center">
+<button onclick="showDemoDashboard()" class="bg-[#042C53] hover:bg-[#0C447C] text-white px-10 py-4 rounded-3xl font-semibold flex items-center gap-3 mx-auto">
+<i class="fa-solid fa-play"></i> Try Interactive Demo
+</button>
+</div>
+</div>
+</section>
+
 <!-- STATS -->
 <section id="stats" class="py-16 bg-[#042C53] text-white">
 <div class="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
@@ -207,6 +359,40 @@ loading="lazy"
 </div>
 </div>
 </section>
+
+<!-- Demo Dashboard Modal -->
+<div id="demo-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+<div class="bg-white dark:bg-[#12283F] rounded-3xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-auto">
+<div class="p-8 border-b dark:border-white/10 flex items-center justify-between sticky top-0 bg-white dark:bg-[#12283F]">
+<h3 class="text-2xl font-bold">TransitFlow Operations Demo</h3>
+<button onclick="closeDemoModal()" class="text-3xl leading-none">×</button>
+</div>
+<div class="p-8 space-y-8">
+<div class="bg-emerald-50 dark:bg-emerald-900/30 p-6 rounded-2xl">
+<h4 class="font-semibold mb-3">✅ Dispatch Simulation</h4>
+<button onclick="simulateDispatch()" class="w-full bg-[#042C53] text-white py-4 rounded-2xl font-medium">Dispatch Sample Trip (Enforces All Rules)</button>
+</div>
+<div id="demo-status" class="text-sm text-center text-zinc-500 dark:text-zinc-400"></div>
+
+<!-- Interest Checkbox -->
+<div class="mt-8 pt-6 border-t dark:border-white/10">
+  <p class="font-medium mb-4 text-center">Are you interested in implementing these business rules in your operations?</p>
+  <div class="flex justify-center gap-8">
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="interest-yes" onchange="handleInterest(this)" class="w-5 h-5 accent-[#042C53]">
+      <span class="font-medium">Yes, I'm Interested</span>
+    </label>
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" id="interest-no" onchange="handleInterest(this)" class="w-5 h-5 accent-[#042C53]">
+      <span class="font-medium">No, Not Interested</span>
+    </label>
+  </div>
+  <div id="interest-response" class="mt-6 text-center text-sm font-medium hidden"></div>
+</div>
+</div>
+</div>
+</div>
+
 <script>
 // ---- Dark mode ----
 function toggleDarkMode() {
@@ -224,15 +410,176 @@ function syncThemeIcon() {
   icon.classList.toggle('fa-sun', isDark);
 }
 
-// ---- Button placeholders (wire up to real destinations as needed) ----
-function requestQuote() {
-  console.log('Quote requested');
+// Mandatory Business Rules Data
+const mandatoryRules = [
+  { icon: "🔢", title: "Unique Registration", desc: "Vehicle registration number must be unique." },
+  { icon: "🚫", title: "No Retired/In Shop", desc: "Retired or In Shop vehicles never appear in dispatch." },
+  { icon: "📅", title: "Valid Licenses", desc: "Drivers with expired licenses or Suspended status cannot be assigned." },
+  { icon: "🔄", title: "No Double Booking", desc: "A driver or vehicle already On Trip cannot be reassigned." },
+  { icon: "⚖️", title: "Load Capacity", desc: "Cargo weight must not exceed vehicle's maximum capacity." },
+  { icon: "🔄", title: "Auto Status Update", desc: "Dispatching changes status to On Trip automatically." },
+  { icon: "✅", title: "Trip Completion", desc: "Completing trip restores both to Available." },
+  { icon: "❌", title: "Trip Cancellation", desc: "Cancelling restores vehicle & driver to Available." },
+  { icon: "🔧", title: "Maintenance", desc: "Active maintenance sets vehicle to In Shop." }
+];
+
+// Core Database Entities
+const dbEntities = [
+  { name: "Users", icon: "👤", fields: "id, username, email, role_id, created_at", desc: "System users with authentication" },
+  { name: "Roles", icon: "🔑", fields: "id, name, permissions", desc: "Access control (Admin, Dispatcher, Driver, etc.)" },
+  { name: "Vehicles", icon: "🚛", fields: "id, reg_no, model, capacity, status, current_driver_id", desc: "Fleet management with status tracking" },
+  { name: "Drivers", icon: "🧑‍✈️", fields: "id, name, license_no, expiry_date, status, user_id", desc: "Driver profiles with license validation" },
+  { name: "Trips", icon: "🛣️", fields: "id, vehicle_id, driver_id, cargo_weight, status, start_time, end_time", desc: "Core trip records with business rule enforcement" },
+  { name: "MaintenanceLogs", icon: "🔧", fields: "id, vehicle_id, start_date, end_date, description, status", desc: "Maintenance history and scheduling" },
+  { name: "FuelLogs", icon: "⛽", fields: "id, vehicle_id, date, liters, cost, mileage", desc: "Fuel consumption and efficiency tracking" },
+  { name: "Expenses", icon: "💰", fields: "id, trip_id, type, amount, date, description", desc: "Operational cost tracking" }
+];
+
+// Mandatory Deliverables
+const deliverables = [
+  { no: "01", title: "Responsive Web Interface", desc: "Fully responsive, modern UI/UX across all devices with Tailwind CSS", icon: "📱" },
+  { no: "02", title: "Authentication with RBAC", desc: "Secure login, role-based access control for Admin, Dispatcher, Driver roles", icon: "🔐" },
+  { no: "03", title: "CRUD for Vehicles & Drivers", desc: "Complete Create, Read, Update, Delete operations with validation", icon: "📋" },
+  { no: "04", title: "Trip Management with Validations", desc: "End-to-end trip lifecycle with mandatory business rule checks", icon: "🛣️" },
+  { no: "05", title: "Automatic Status Transitions", desc: "Real-time automatic updates for On Trip, Available, In Shop, etc.", icon: "🔄" },
+  { no: "06", title: "Maintenance Workflow", desc: "Full maintenance request, tracking and completion workflow", icon: "🔧" },
+  { no: "07", title: "Fuel & Expense Tracking", desc: "Detailed logging and reporting for fuel consumption and operational costs", icon: "⛽" },
+  { no: "08", title: "Dashboard with KPIs", desc: "Real-time analytics dashboard showing utilization, active trips, efficiency metrics", icon: "📊" }
+];
+
+// Bonus Features
+const bonusFeatures = [
+  { icon: "📈", title: "Charts & Visual Analytics", desc: "Interactive charts for fleet utilization, fuel efficiency, trip performance using Chart.js" },
+  { icon: "📄", title: "PDF Export", desc: "One-click PDF reports for trips, maintenance logs, and expense summaries" },
+  { icon: "✉️", title: "Email Reminders", desc: "Automated notifications for license expiry, maintenance due dates, and low fuel alerts" },
+  { icon: "📁", title: "Vehicle Document Management", desc: "Secure storage and expiry tracking for insurance, permits, and compliance documents" },
+  { icon: "🌙", title: "Advanced Dark Mode", desc: "Seamless dark/light mode with system preference detection and persistence" }
+];
+
+// Render Rules
+function renderRules() {
+  const container = document.getElementById('rules-container');
+  container.innerHTML = mandatoryRules.map(rule => `
+    <div class="rule-card bg-white dark:bg-[#1A324F] p-6 rounded-3xl border border-[#D3D1C7] dark:border-white/10">
+      <div class="flex gap-4">
+        <div class="text-4xl flex-shrink-0">${rule.icon}</div>
+        <div>
+          <h4 class="font-semibold text-lg mb-1">${rule.title}</h4>
+          <p class="text-[#666] dark:text-[#B4B2A9]">${rule.desc}</p>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
+
+// Render Database Entities
+function renderEntities() {
+  const container = document.getElementById('entities-container');
+  container.innerHTML = dbEntities.map(entity => `
+    <div class="entity-card bg-white dark:bg-[#12283F] p-6 rounded-3xl border border-[#D3D1C7] dark:border-white/10">
+      <div class="text-5xl mb-4">${entity.icon}</div>
+      <h4 class="font-bold text-2xl mb-1">${entity.name}</h4>
+      <p class="text-sm text-[#666] dark:text-[#B4B2A9] mb-4">${entity.desc}</p>
+      <div class="bg-zinc-100 dark:bg-zinc-800 text-xs font-mono p-3 rounded-2xl overflow-auto">
+        ${entity.fields}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Render Deliverables
+function renderDeliverables() {
+  const container = document.getElementById('deliverables-container');
+  container.innerHTML = deliverables.map(d => `
+    <div class="deliverable-card bg-white dark:bg-[#12283F] p-8 rounded-3xl border border-[#D3D1C7] dark:border-white/10">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="text-4xl">${d.icon}</div>
+        <div class="text-4xl font-bold text-[#042C53] dark:text-white">${d.no}</div>
+      </div>
+      <h4 class="font-bold text-xl mb-3">${d.title}</h4>
+      <p class="text-[#666] dark:text-[#B4B2A9]">${d.desc}</p>
+    </div>
+  `).join('');
+}
+
+// Render Bonus Features
+function renderBonusFeatures() {
+  const container = document.getElementById('bonus-container');
+  container.innerHTML = bonusFeatures.map(b => `
+    <div class="bonus-card bg-white dark:bg-[#12283F] p-8 rounded-3xl border border-[#D3D1C7] dark:border-white/10">
+      <div class="text-5xl mb-6">${b.icon}</div>
+      <h4 class="font-bold text-xl mb-3">${b.title}</h4>
+      <p class="text-[#666] dark:text-[#B4B2A9]">${b.desc}</p>
+    </div>
+  `).join('');
+}
+
+// Demo Functions
+let demoVehicleStatus = "Available";
+
+function showDemoDashboard() {
+  document.getElementById('demo-modal').classList.remove('hidden');
+  document.getElementById('demo-status').innerHTML = `
+    <p class="font-medium">Current Vehicle Status: <span class="text-emerald-600 font-semibold">${demoVehicleStatus}</span></p>
+  `;
+  document.getElementById('interest-yes').checked = false;
+  document.getElementById('interest-no').checked = false;
+  document.getElementById('interest-response').classList.add('hidden');
+}
+
+function closeDemoModal() {
+  document.getElementById('demo-modal').classList.add('hidden');
+}
+
+function simulateDispatch() {
+  if (demoVehicleStatus === "On Trip") {
+    alert("❌ Rule Violation: Vehicle is already On Trip!");
+    return;
+  }
+  
+  demoVehicleStatus = "On Trip";
+  document.getElementById('demo-status').innerHTML = `
+    <p class="text-emerald-600 font-semibold">✅ Trip Dispatched Successfully!</p>
+    <p class="text-sm mt-2">Vehicle & Driver status updated to <strong>On Trip</strong> (Rule enforced)</p>
+  `;
+  
+  setTimeout(() => {
+    if (confirm("Complete this trip?")) {
+      demoVehicleStatus = "Available";
+      document.getElementById('demo-status').innerHTML = `
+        <p class="text-emerald-600 font-semibold">✅ Trip Completed!</p>
+        <p class="text-sm mt-2">Status restored to <strong>Available</strong></p>
+      `;
+    }
+  }, 1500);
+}
+
+// Interest Handler
+function handleInterest(checkbox) {
+  const yesBox = document.getElementById('interest-yes');
+  const noBox = document.getElementById('interest-no');
+  const response = document.getElementById('interest-response');
+  if (checkbox.id === 'interest-yes' && checkbox.checked) {
+    noBox.checked = false;
+    response.innerHTML = `<span class="text-emerald-600">Thank you! Our team will contact you soon about implementing these rules.</span>`;
+    response.classList.remove('hidden');
+  } else if (checkbox.id === 'interest-no' && checkbox.checked) {
+    yesBox.checked = false;
+    response.innerHTML = `<span class="text-zinc-500">Thank you for your feedback.</span>`;
+    response.classList.remove('hidden');
+  }
+}
+
+// Button placeholders
+function requestQuote() {
+  alert("Quote request initiated! Our team will contact you shortly.");
+}
+
 function exploreMore() {
   document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ---- Animated counters ----
+// Animated counters
 function animateCounter(id, target, duration = 2000) {
   const element = document.getElementById(id);
   if (!element) return;
@@ -249,7 +596,7 @@ function animateCounter(id, target, duration = 2000) {
   }, 16);
 }
 
-// ---- Scroll reveal ----
+// Scroll reveal
 function handleScroll() {
   document.querySelectorAll('.scroll-reveal').forEach((el) => {
     const rect = el.getBoundingClientRect();
@@ -259,9 +606,13 @@ function handleScroll() {
   });
 }
 
-// ---- Mobile menu ----
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
   syncThemeIcon();
+  renderRules();
+  renderEntities();
+  renderDeliverables();
+  renderBonusFeatures();
 
   const mobileBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
@@ -269,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu?.classList.toggle('hidden');
   });
 
-  // Trigger counters once the stats section is visible
+  // Stats observer
   const statsSection = document.getElementById('stats');
   if (statsSection && 'IntersectionObserver' in window) {
     const statsObserver = new IntersectionObserver((entries) => {
@@ -285,7 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.5 });
     statsObserver.observe(statsSection);
   } else {
-    // Fallback if IntersectionObserver is unavailable
     animateCounter('clients', 500);
     animateCounter('countries', 120);
     animateCounter('shipments', 12480);
@@ -295,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', handleScroll);
   handleScroll();
 
-  console.log('%cTransitFlow - Smart Transport Experience Ready 🚢', 'color: #D85A30; font-size: 16px; font-weight: bold;');
+  console.log('%cTransitFlow - Smart Transport with Enforced Business Rules Ready 🚢', 'color: #D85A30; font-size: 16px; font-weight: bold;');
 });
 </script>
 </body>
