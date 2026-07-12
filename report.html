@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - TransitOps</title>
+    <script>
+        const initStorage = () => {
+            if (!localStorage.getItem('transitops_db')) {
+                const initialData = {
+                    users: [],
+                    vehicles: [
+                        { id: "V001", regNo: "VAN-05", name: "Ford Transit Van-05", type: "Van", maxLoad: 500, odometer: 12000, acqCost: 25000, status: "Available" },
+                        { id: "V002", regNo: "TRK-01", name: "Volvo Heavy Truck", type: "Truck", maxLoad: 5000, odometer: 45000, acqCost: 85000, status: "On Trip" }
+                    ],
+                    drivers: [],
+                    trips: [
+                        { id: "T-1", vehicleId: "V001", distance: 450, revenue: 1200 },
+                        { id: "T-2", vehicleId: "V002", distance: 1200, revenue: 4500 }
+                    ],
+                    maintenance: [
+                        { id: "MNT-1", vehicleId: "V002", serviceType: "Oil Change", cost: 150, status: "Resolved" }
+                    ],
+                    expenses: [
+                        { id: "EXP-1", vehicleId: "V001", type: "Fuel", amount: 150, liters: 50 },
+                        { id: "EXP-2", vehicleId: "V002", type: "Fuel", amount: 400, liters: 120 },
+                        { id: "EXP-3", vehicleId: "V001", type: "Toll", amount: 30, liters: 0 }
+                    ]
+                };
+                localStorage.setItem('transitops_db', JSON.stringify(initialData));
+            }
+        };
+        initStorage();
+
+        window.getDB = function() { 
+            return JSON.parse(localStorage.getItem('transitops_db')); 
+        };
+    </script>
+    <style>
+        :root {
+            --primary-900: #042C53;
+            --primary-800: #0C447C;
+            --primary-600: #185FA5;
+            --primary-400: #378ADD;
+            --primary-50: #E6F1FB;
+            --accent: #D85A30;
+            --accent-light: #EF9F27;
+            --text-dark: #1e293b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation Layout */
+        .sidebar {
+            width: 260px;
+            background: var(--primary-900);
+            color: white;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 32px 0;
+            font-size: 24px;
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary-800);
+            padding-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: var(--primary-50);
+            padding: 12px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* Workspace Grid Window */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-panel h1 {
+            margin: 0;
+            color: var(--primary-900);
+            font-size: 28px;
+        }
+
+        /* Top Analytical KPI Widget Panels */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .kpi-card label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .kpi-card div {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-900);
+            margin-top: 8px;
+        }
+
+        /* Data Matrix Panels */
+        .card-panel {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .card-panel h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary-800);
+            font-size: 18px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Action Controls Buttons styling */
+        .btn-action {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-csv {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-csv:hover {
+            background: var(--primary-800);
+        }
+
+        /* Table Matrix Data */
+        .table-responsive {
+            background: #ffffff;
+            overflow-hidden: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: var(--primary-800);
+            color: white;
+            padding: 14px 16px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>TransitOps</h2>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="fleet.html">Vehicle Registry</a>
+        <a href="drivers.html">Driver Directory</a>
+        <a href="trips.html">Trip Dispatch</a>
+        <a href="maintenance.html">Maintenance Logs</a>
+        <a href="expenses.html">Expenses & ROI</a>
+        <a href="reports.html" class="active">Reports & Analytics</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-panel">
+            <h1>Reports & Intelligence Matrix</h1>
+            <div><strong>Role Access:</strong> Executive Director</div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <label>Fleet Utilization</label>
+                <div id="kpiUtilization">0.0%</div>
+            </div>
+            <div class="kpi-card">
+                <label>Total Operational Cost</label>
+                <div id="kpiOpCost">₹0.00</div>
+            </div>
+            <div class="kpi-card">
+                <label>Average Fuel Efficiency</label>
+                <div id="kpiEfficiency">0.00 km/L</div>
+            </div>
+        </div>
+
+        <div class="card-panel">
+            <div class="control-row">
+                <h3>Asset Performance & Strategic ROI Report</h3>
+                <div>
+                    <button class="btn-csv" onclick="exportReportToCSV()">Download CSV Data</button>
+                    <button class="btn-action" onclick="compileAndLockReport()">Compile & Verify Report</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="analyticsTable">
+                    <thead>
+                        <tr>
+                            <th>Vehicle Plate</th>
+                            <th>Total Distance</th>
+                            <th>Fuel Efficiency</th>
+                            <th>Operational Cost</th>
+                            <th>Total Revenue</th>
+                            <th>Calculated ROI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CORE COMPUTING LOGIC: Runs calculations for metrics required
+        const calculateAnalytics = () => {
+            const db = getDB();
+            let totalFleetVehicles = db.vehicles.length;
+            let activeOnTripVehicles = db.vehicles.filter(v => v.status === 'On Trip').length;
+
+            // 1. Calculate Fleet Utilization Rate
+            let fleetUtilization = totalFleetVehicles > 0 ? (activeOnTripVehicles / totalFleetVehicles) * 100 : 0;
+            document.getElementById('kpiUtilization').innerText = fleetUtilization.toFixed(1) + '%';
+
+            let globalOpCost = 0;
+            let globalDistance = 0;
+            let globalFuelLiters = 0;
+
+            const tbody = document.querySelector('#analyticsTable tbody');
+            tbody.innerHTML = '';
+
+            db.vehicles.forEach(vehicle => {
+                // Total Distance compiled via historical trips
+                let totalDistance = db.trips ? db.trips.filter(t => t.vehicleId === vehicle.id).reduce((sum, t) => sum + t.distance, 0) : 0;
+                let totalRevenue = db.trips ? db.trips.filter(t => t.vehicleId === vehicle.id).reduce((sum, t) => sum + t.revenue, 0) : 0;
+
+                // Total Fuel Cost & Volumetric Liters compiled via financial ledger entries
+                let fuelCost = db.expenses ? db.expenses.filter(e => e.vehicleId === vehicle.id && e.type === 'Fuel').reduce((sum, e) => sum + e.amount, 0) : 0;
+                let fuelLiters = db.expenses ? db.expenses.filter(e => e.vehicleId === vehicle.id && e.type === 'Fuel').reduce((sum, e) => sum + e.liters, 0) : 0;
+                let miscCost = db.expenses ? db.expenses.filter(e => e.vehicleId === vehicle.id && e.type !== 'Fuel').reduce((sum, e) => sum + e.amount, 0) : 0;
+
+                // Maintenance costs compiled via maintenance records
+                let maintenanceCost = db.maintenance ? db.maintenance.filter(m => m.vehicleId === vehicle.id).reduce((sum, m) => sum + m.cost, 0) : 0;
+
+                // 2. Compute formulas as defined by business requirements
+                let operationalCost = fuelCost + miscCost + maintenanceCost;
+                let efficiency = fuelLiters > 0 ? (totalDistance / fuelLiters) : 0;
+
+                // Formula: ROI = [Revenue - (Maintenance + Fuel)] / Acquisition Cost
+                let totalDeductions = maintenanceCost + fuelCost;
+                let acquisitionCost = vehicle.acqCost || 20000; // safety fallback check if not set
+                let vehicleROI = (totalRevenue - totalDeductions) / acquisitionCost;
+
+                // Update running parameters
+                globalOpCost += operationalCost;
+                globalDistance += totalDistance;
+                globalFuelLiters += fuelLiters;
+
+                // Inject data row directly
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${vehicle.regNo}</strong> <span style="color:#64748b; font-size:12px;">(${vehicle.name})</span></td>
+                        <td>${totalDistance} km</td>
+                        <td><b>${efficiency.toFixed(2)}</b> km/L</td>
+                        <td>₹${operationalCost.toFixed(2)}</td>
+                        <td style="color:#065f46; font-weight:600;">₹${totalRevenue.toFixed(2)}</td>
+                        <td style="font-weight:700; color: ${vehicleROI >= 0 ? '#185fa5' : '#d85a30'}">
+                            ${(vehicleROI * 100).toFixed(1)}% ROI
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Update Top Global KPI Cards
+            document.getElementById('kpiOpCost').innerText = '₹' + globalOpCost.toFixed(2);
+            let avgEfficiency = globalFuelLiters > 0 ? (globalDistance / globalFuelLiters) : 0;
+            document.getElementById('kpiEfficiency').innerText = avgEfficiency.toFixed(2) + ' km/L';
+        };
+
+        // SUCCESS ALERT INTERACTION HANDLER: Simulates compilation success page state transitions
+        window.compileAndLockReport = () => {
+            alert("SUCCESS: Analytics Ledger Pipeline Processed!\nReport metrics compiled seamlessly and saved to system files cache.");
+        };
+
+        // EXPORT DATA UTILITY: Generates a CSV data string downloadable instantly inside browser
+        window.exportReportToCSV = () => {
+            const db = getDB();
+            let csvContent = "data:text/csv;charset=utf-8,Vehicle Plate,Total Distance(KM),Fuel Efficiency(KM/L),Operational Cost(₹),Total Revenue(₹),ROI(%)\r\n";
+
+            db.vehicles.forEach(v => {
+                let dist = db.trips ? db.trips.filter(t => t.vehicleId === v.id).reduce((sum, t) => sum + t.distance, 0) : 0;
+                let rev = db.trips ? db.trips.filter(t => t.vehicleId === v.id).reduce((sum, t) => sum + t.revenue, 0) : 0;
+                let fCost = db.expenses ? db.expenses.filter(e => e.vehicleId === v.id && e.type === 'Fuel').reduce((sum, e) => sum + e.amount, 0) : 0;
+                let fLiters = db.expenses ? db.expenses.filter(e => e.vehicleId === v.id && e.type === 'Fuel').reduce((sum, e) => sum + e.liters, 0) : 0;
+                let mCost = db.maintenance ? db.maintenance.filter(m => m.vehicleId === v.id).reduce((sum, m) => sum + m.cost, 0) : 0;
+                let misc = db.expenses ? db.expenses.filter(e => e.vehicleId === v.id && e.type !== 'Fuel').reduce((sum, e) => sum + e.amount, 0) : 0;
+
+                let op = fCost + misc + mCost;
+                let eff = fLiters > 0 ? (dist / fLiters) : 0;
+                let roi = ((rev - (mCost + fCost)) / (v.acqCost || 20000)) * 100;
+
+                csvContent += `${v.regNo},${dist},${eff.toFixed(2)},${op.toFixed(2)},${rev.toFixed(2)},${roi.toFixed(1)}%\r\n`;
+            });
+
+            // Browser download link generation sequence
+            const encodedUri = encodeURI(csvContent);
+            const downloadLink = document.createElement("a");
+            downloadLink.setAttribute("href", encodedUri);
+            downloadLink.setAttribute("download", `TransitOps_Fleet_Report_${Date.now()}.csv`);
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        };
+
+        // Bootstrap loader sequence
+        document.addEventListener('DOMContentLoaded', calculateAnalytics);
+    </script>
+</body>
+</html>

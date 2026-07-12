@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel & Expense Management - TransitOps</title>
+    <script>
+        const initStorage = () => {
+            if (!localStorage.getItem('transitops_db')) {
+                const initialData = {
+                    users: [],
+                    vehicles: [
+                        { id: "V001", regNo: "VAN-05", name: "Ford Transit Van-05", type: "Van", maxLoad: 500, odometer: 12000, acqCost: 25000, status: "Available" },
+                        { id: "V002", regNo: "TRK-01", name: "Volvo Heavy Truck", type: "Truck", maxLoad: 5000, odometer: 45000, acqCost: 85000, status: "Available" }
+                    ],
+                    drivers: [],
+                    trips: [],
+                    maintenance: [
+                        { id: "MNT-1", vehicleId: "V002", vehicleReg: "TRK-01", serviceType: "Oil Change", description: "Routine engine oil change", cost: 150, date: "2026-07-10", status: "Resolved" }
+                    ],
+                    expenses: [
+                        { id: "EXP-1", vehicleId: "V001", vehicleReg: "VAN-05", type: "Fuel", amount: 65, date: "2026-07-11", liters: 45, remarks: "Refuel at Shell Station" },
+                        { id: "EXP-2", vehicleId: "V002", vehicleReg: "TRK-01", type: "Toll", amount: 40, date: "2026-07-12", liters: 0, remarks: "Highway Toll Gate A" }
+                    ]
+                };
+                localStorage.setItem('transitops_db', JSON.stringify(initialData));
+            }
+        };
+        initStorage();
+
+        window.getDB = function() { 
+            return JSON.parse(localStorage.getItem('transitops_db')); 
+        };
+        window.saveDB = function(data) { 
+            localStorage.setItem('transitops_db', JSON.stringify(data)); 
+        };
+    </script>
+    <style>
+        :root {
+            --primary-900: #042C53;
+            --primary-800: #0C447C;
+            --primary-600: #185FA5;
+            --primary-400: #378ADD;
+            --primary-50: #E6F1FB;
+            --accent: #D85A30;
+            --accent-light: #EF9F27;
+            --text-dark: #1e293b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Layout styling */
+        .sidebar {
+            width: 260px;
+            background: var(--primary-900);
+            color: white;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 32px 0;
+            font-size: 24px;
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary-800);
+            padding-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: var(--primary-50);
+            padding: 12px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* Main Workspace Window Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-panel h1 {
+            margin: 0;
+            color: var(--primary-900);
+            font-size: 28px;
+        }
+
+        /* Twin Columns Configuration */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 32px;
+        }
+
+        @media(max-width: 900px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        .card-panel {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            box-sizing: border-box;
+        }
+
+        .card-panel h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary-800);
+            font-size: 18px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .expense-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label, .form-group-full label {
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-800);
+        }
+
+        .form-group input, .form-group select, .form-group-full input {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-600);
+        }
+
+        .btn-submit {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            grid-column: 1 / -1;
+            justify-self: end;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-light);
+        }
+
+        /* Table Details Layout */
+        .table-responsive {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: var(--primary-800);
+            color: white;
+            padding: 14px 16px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Status Badge Settings */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-fuel { background: #e6f1fb; color: #0c447c; }
+        .badge-toll { background: #fef3c7; color: #92400e; }
+        .badge-other { background: #f1f5f9; color: #475569; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>TransitOps</h2>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="fleet.html">Vehicle Registry</a>
+        <a href="drivers.html">Driver Directory</a>
+        <a href="trips.html">Trip Dispatch</a>
+        <a href="maintenance.html">Maintenance Logs</a>
+        <a href="expenses.html" class="active">Expenses & ROI</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-panel">
+            <h1>Fuel & Expense Analytics</h1>
+            <div><strong>Role View:</strong> Financial Analyst</div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card-panel">
+                <h3>Log Financial Cost Ledger</h3>
+                <form id="expenseForm" class="expense-form">
+                    <div class="form-group">
+                        <label for="vehicleSelect">Select Vehicle</label>
+                        <select id="vehicleSelect" required>
+                            <option value="">-- Select --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="expenseType">Expense Category</label>
+                        <select id="expenseType" onchange="toggleFuelField(this.value)" required>
+                            <option value="Fuel">Fuel Entry</option>
+                            <option value="Toll">Road Tolls</option>
+                            <option value="Other">Other Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="costAmount">Total Cost (₹)</label>
+                        <input type="number" id="costAmount" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logDate">Transaction Date</label>
+                        <input type="date" id="logDate" required>
+                    </div>
+                    <div class="form-group" id="litersGroup">
+                        <label for="fuelLiters">Fuel Volume (Liters)</label>
+                        <input type="number" id="fuelLiters" placeholder="0.00" min="0" step="0.01" value="0">
+                    </div>
+                    <div class="form-group-full" style="margin-top: 6px;">
+                        <label for="remarks">Receipt Notes / Description</label>
+                        <input type="text" id="remarks" placeholder="Receipt info or location context..." required>
+                    </div>
+                    <button type="submit" class="btn-submit">Commit Cost Entry</button>
+                </form>
+            </div>
+
+            <div class="card-panel">
+                <h3>Total Operational Cost Summary</h3>
+                <p style="font-size: 14px; color:#64748b; margin-top:-10px; margin-bottom:15px;">
+                    Calculates aggregate values per asset: <b>Fuel Costs + Tolls/Misc + Live Shop Maintenance Logs</b>.
+                </p>
+                <div class="table-responsive" style="box-shadow:none; border-radius:8px;">
+                    <table id="summaryTable">
+                        <thead>
+                            <tr>
+                                <th>Vehicle Plate</th>
+                                <th>Fuel & Misc</th>
+                                <th>Maintenance</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <h2>Expense Activity Stream</h2>
+        <div class="table-responsive">
+            <table id="expensesTable">
+                <thead>
+                    <tr>
+                        <th>Vehicle Plate</th>
+                        <th>Category</th>
+                        <th>Cost Amount</th>
+                        <th>Fuel Vol (Liters)</th>
+                        <th>Transaction Date</th>
+                        <th>Description Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Toggle the visibility of the fuel volume field dynamically
+        function toggleFuelField(val) {
+            const litersGroup = document.getElementById('litersGroup');
+            const litersInput = document.getElementById('fuelLiters');
+            if (val === 'Fuel') {
+                litersGroup.style.display = 'flex';
+                litersInput.setAttribute('required', 'true');
+            } else {
+                litersGroup.style.display = 'none';
+                litersInput.removeAttribute('required');
+                litersInput.value = '0';
+            }
+        }
+
+        // Dropdown populator logic utility
+        const populateDropdown = () => {
+            const db = getDB();
+            const select = document.getElementById('vehicleSelect');
+            select.innerHTML = '<option value="">-- Select --</option>';
+            db.vehicles.forEach(v => {
+                select.innerHTML += `<option value="${v.id}">${v.regNo} - ${v.name}</option>`;
+            });
+        };
+
+        // Render standard log rows display matrix table 
+        const renderExpensesTable = () => {
+            const db = getDB();
+            const tbody = document.querySelector('#expensesTable tbody');
+            tbody.innerHTML = '';
+
+            if (!db.expenses || db.expenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#64748b; padding:15px;">No transactional cost records committed.</td></tr>`;
+                return;
+            }
+
+            db.expenses.forEach(exp => {
+                let typeClass = 'badge-other';
+                if(exp.type === 'Fuel') typeClass = 'badge-fuel';
+                if(exp.type === 'Toll') typeClass = 'badge-toll';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${exp.vehicleReg}</strong></td>
+                        <td><span class="badge ${typeClass}">${exp.type}</span></td>
+                        <td><b>₹${exp.amount.toFixed(2)}</b></td>
+                        <td>${exp.type === 'Fuel' ? `${exp.liters} L` : '-'}</td>
+                        <td>${exp.date}</td>
+                        <td><span style="color:#475569; font-size:14px;">${exp.remarks}</span></td>
+                    </tr>
+                `;
+            });
+        };
+
+        // CORE COMPUTE ENGINE: Compiles total costs matching your requirements
+        const renderCostSummaryTable = () => {
+            const db = getDB();
+            const tbody = document.querySelector('#summaryTable tbody');
+            tbody.innerHTML = '';
+
+            db.vehicles.forEach(vehicle => {
+                // 1. Accumulate all values logged in the expense table for this vehicle
+                let runningExpenseTotal = 0;
+                if (db.expenses) {
+                    runningExpenseTotal = db.expenses
+                        .filter(e => e.vehicleId === vehicle.id)
+                        .reduce((sum, current) => sum + current.amount, 0);
+                }
+
+                // 2. Automatically check maintenance logs to find structural service costs
+                let runningMaintenanceTotal = 0;
+                if (db.maintenance) {
+                    runningMaintenanceTotal = db.maintenance
+                        .filter(m => m.vehicleId === vehicle.id)
+                        .reduce((sum, current) => sum + current.cost, 0);
+                }
+
+                // 3. Compute formula (Fuel + Maintenance)
+                const grandTotalCost = runningExpenseTotal + runningMaintenanceTotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code>${vehicle.regNo}</code></td>
+                        <td>₹${runningExpenseTotal.toFixed(2)}</td>
+                        <td>₹${runningMaintenanceTotal.toFixed(2)}</td>
+                        <td style="color:var(--accent); font-weight:700;">₹${grandTotalCost.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Capture user input forms submissions
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const db = getDB();
+
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const targetVehicle = db.vehicles.find(v => v.id === vehicleId);
+            const expenseType = document.getElementById('expenseType').value;
+
+            const newExpense = {
+                id: 'EXP-' + Date.now(),
+                vehicleId: vehicleId,
+                vehicleReg: targetVehicle.regNo,
+                type: expenseType,
+                amount: parseFloat(document.getElementById('costAmount').value),
+                date: document.getElementById('logDate').value,
+                liters: expenseType === 'Fuel' ? parseFloat(document.getElementById('fuelLiters').value) : 0,
+                remarks: document.getElementById('remarks').value
+            };
+
+            if (!db.expenses) db.expenses = [];
+            db.expenses.push(newExpense);
+            saveDB(db);
+
+            alert("Financial record logged successfully! Total costs updated live.");
+            
+            e.target.reset();
+            toggleFuelField('Fuel'); // reset input focus fields defaults
+            renderExpensesTable();
+            renderCostSummaryTable();
+        });
+
+        // Application bootstrap initial loading sequence
+        document.addEventListener('DOMContentLoaded', () => {
+            populateDropdown();
+            renderExpensesTable();
+            renderCostSummaryTable();
+        });
+    </script>
+</body>
+</html>
+5

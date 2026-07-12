@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Management - TransitOps</title>
+    <script>
+        const initStorage = () => {
+            if (!localStorage.getItem('transitops_db')) {
+                const initialData = {
+                    users: [],
+                    vehicles: [
+                        { id: "V001", regNo: "VAN-05", name: "Ford Transit Van-05", type: "Van", maxLoad: 500, odometer: 12000, acqCost: 25000, status: "Available" },
+                        { id: "V002", regNo: "TRK-01", name: "Volvo Heavy Truck", type: "Truck", maxLoad: 5000, odometer: 45000, acqCost: 85000, status: "Available" }
+                    ],
+                    drivers: [],
+                    trips: [],
+                    maintenance: [
+                        { id: "MNT-1", vehicleId: "V002", vehicleReg: "TRK-01", serviceType: "Oil Change", description: "Routine engine oil filter change", cost: 150, date: "2026-07-10", status: "In Shop" }
+                    ],
+                    expenses: []
+                };
+                localStorage.setItem('transitops_db', JSON.stringify(initialData));
+            }
+        };
+        initStorage();
+
+        window.getDB = function() { 
+            return JSON.parse(localStorage.getItem('transitops_db')); 
+        };
+        window.saveDB = function(data) { 
+            localStorage.setItem('transitops_db', JSON.stringify(data)); 
+        };
+    </script>
+    <style>
+        :root {
+            --primary-900: #042C53;
+            --primary-800: #0C447C;
+            --primary-600: #185FA5;
+            --primary-400: #378ADD;
+            --primary-50: #E6F1FB;
+            --accent: #D85A30;
+            --accent-light: #EF9F27;
+            --text-dark: #1e293b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Layout */
+        .sidebar {
+            width: 260px;
+            background: var(--primary-900);
+            color: white;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 32px 0;
+            font-size: 24px;
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary-800);
+            padding-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: var(--primary-50);
+            padding: 12px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* Main Workspace Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-panel h1 {
+            margin: 0;
+            color: var(--primary-900);
+            font-size: 28px;
+        }
+
+        /* Layout Cards */
+        .card-panel {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .card-panel h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary-800);
+            font-size: 18px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .maintenance-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label, .form-group-full label {
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-800);
+        }
+
+        .form-group input, .form-group select, .form-group-full textarea {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group-full textarea:focus {
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 3px var(--primary-50);
+        }
+
+        .btn-submit {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            grid-column: 1 / -1;
+            justify-self: end;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-action {
+            background: var(--primary-600);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-action:hover {
+            background: var(--primary-800);
+        }
+
+        /* Table Details */
+        .table-responsive {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: var(--primary-800);
+            color: white;
+            padding: 16px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Status Tags */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-shop { background: #fee2e2; color: #991b1b; }
+        .badge-fixed { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+   
+
+    <div class="sidebar">
+        <h2>TransitOps</h2>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="fleet.html">Vehicle Registry</a>
+        <a href="drivers.html">Driver Directory</a>
+        <a href="trips.html">Trip Dispatch</a>
+        <a href="maintenance.html" class="active">Maintenance Logs</a>
+        <a href="expenses.html">Expenses & ROI</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-panel">
+            <h1>Vehicle Maintenance Registry</h1>
+            <div><strong>Role:</strong> Fleet Manager</div>
+        </div>
+
+        <div class="card-panel">
+            <h3>Log New Vehicle Service Record</h3>
+            <form id="maintenanceForm" class="maintenance-form">
+                <div class="form-group">
+                    <label for="vehicleSelect">Select Fleet Vehicle</label>
+                    <select id="vehicleSelect" required>
+                        <option value="">-- Choose Active Vehicle --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="serviceType">Service Type</label>
+                    <select id="serviceType" required>
+                        <option value="Oil Change">Oil Change</option>
+                        <option value="Brake Repair">Brake Repair</option>
+                        <option value="Tire Rotation">Tire Replacement</option>
+                        <option value="Engine Tuning">Engine Tuning</option>
+                        <option value="General Inspection">General Inspection</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="serviceCost">Estimated Cost (₹)</label>
+                    <input type="number" id="serviceCost" placeholder="0.00" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="serviceDate">Service Entry Date</label>
+                    <input type="date" id="serviceDate" required>
+                </div>
+                <div class="form-group-full">
+                    <label for="serviceDesc">Issue / Service Description</label>
+                    <textarea id="serviceDesc" rows="3" placeholder="Describe the maintenance tasks or technical defects..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Issue Maintenance Command</button>
+            </form>
+        </div>
+
+        <h2>Maintenance Work Order History</h2>
+        <div class="table-responsive">
+            <table id="maintenanceTable">
+                <thead>
+                    <tr>
+                        <th>Vehicle Plate</th>
+                        <th>Service Type</th>
+                        <th>Description</th>
+                        <th>Cost</th>
+                        <th>Date Registered</th>
+                        <th>Work Status</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Populate the dropdown with vehicles that are NOT currently in the shop
+        const populateVehicleDropdown = () => {
+            const db = getDB();
+            const select = document.getElementById('vehicleSelect');
+            select.innerHTML = '<option value="">-- Choose Active Vehicle --</option>';
+
+            db.vehicles.forEach(vehicle => {
+                // Shows current status in dropdown to assist the manager
+                select.innerHTML += `<option value="${vehicle.id}">${vehicle.regNo} - ${vehicle.name} (${vehicle.status})</option>`;
+            });
+        };
+
+        // Render logs data into display rows
+        const renderMaintenanceTable = () => {
+            const db = getDB();
+            const tbody = document.querySelector('#maintenanceTable tbody');
+            tbody.innerHTML = '';
+
+            if (!db.maintenance || db.maintenance.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b; padding:20px;">No current maintenance work orders logged.</td></tr>`;
+                return;
+            }
+
+            db.maintenance.forEach(log => {
+                const isCurrent = log.status === 'In Shop';
+                const badgeClass = isCurrent ? 'badge-shop' : 'badge-fixed';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${log.vehicleReg}</strong></td>
+                        <td>${log.serviceType}</td>
+                        <td>${log.description}</td>
+                        <td><b>₹${log.cost}</b></td>
+                        <td>${log.date}</td>
+                        <td><span class="badge ${badgeClass}">${log.status}</span></td>
+                        <td>
+                            ${isCurrent ? `<button class="btn-action" onclick="releaseVehicle('${log.id}', '${log.vehicleId}')">Complete Work</button>` : '📂 Completed'}
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Handle the submission form action
+        document.getElementById('maintenanceForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const db = getDB();
+
+            const vehicleId = document.getElementById('vehicleSelect').value;
+            const targetVehicle = db.vehicles.find(v => v.id === vehicleId);
+
+            const newLog = {
+                id: 'MNT-' + Date.now(),
+                vehicleId: vehicleId,
+                vehicleReg: targetVehicle.regNo,
+                serviceType: document.getElementById('serviceType').value,
+                cost: parseFloat(document.getElementById('serviceCost').value),
+                date: document.getElementById('serviceDate').value,
+                description: document.getElementById('serviceDesc').value,
+                status: 'In Shop'
+            };
+
+            // BUSINESS RULE ENFORCEMENT: 
+            // Change vehicle status to 'In Shop' so it disappears from driver selection pool
+            targetVehicle.status = 'In Shop';
+
+            if (!db.maintenance) db.maintenance = [];
+            db.maintenance.push(newLog);
+            
+            saveDB(db);
+            alert(`SUCCESS: ${targetVehicle.regNo} has been assigned to the shop. It is now hidden from the dispatch fleet pool.`);
+            
+            e.target.reset();
+            populateVehicleDropdown();
+            renderMaintenanceTable();
+        });
+
+        // Resolve Maintenance & Restore Vehicle Availability
+        window.releaseVehicle = (logId, vehicleId) => {
+            const db = getDB();
+            
+            const log = db.maintenance.find(m => m.id === logId);
+            const vehicle = db.vehicles.find(v => v.id === vehicleId);
+
+            if (log && vehicle) {
+                log.status = 'Resolved';
+                vehicle.status = 'Available'; // Restores status so it returns to driver dispatch options
+                
+                saveDB(db);
+                alert(`SUCCESS: Work Order Completed. ${vehicle.regNo} is now marked Available for active transit duties.`);
+                
+                populateVehicleDropdown();
+                renderMaintenanceTable();
+            }
+        };
+
+        // Bootstrap load sequence
+        document.addEventListener('DOMContentLoaded', () => {
+            populateVehicleDropdown();
+            renderMaintenanceTable();
+        });
+    </script>
+</body>
+</html>
