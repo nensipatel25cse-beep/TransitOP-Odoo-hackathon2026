@@ -1,1 +1,302 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TransitFlow - Transport and Logistics</title>
+<script>
+  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class'
+  };
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+:root {
+--primary-900: #042C53;
+--primary-800: #0C447C;
+--primary-600: #185FA5;
+--primary-400: #378ADD;
+--primary-50: #E6F1FB;
+--accent: #D85A30;
+--accent-light: #EF9F27;
+}
+.hero-bg {
+background: linear-gradient(rgba(4, 44, 83, 0.88), rgba(4, 44, 83, 0.88)), url('https://picsum.photos/id/1015/2000/1200') center/cover no-repeat;
+}
+.glass {
+background: rgba(255, 255, 255, 0.12);
+backdrop-filter: blur(16px);
+-webkit-backdrop-filter: blur(16px);
+border: 1px solid rgba(255,255,255,0.2);
+}
+.glass-frame {
+background: rgba(255, 255, 255, 0.10);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border: 1px solid rgba(255,255,255,0.25);
+box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+}
+.service-card {
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.service-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 20px 40px -15px rgb(0 0 0 / 0.2);
+}
+.counter {
+font-variant-numeric: tabular-nums;
+}
+.scroll-reveal {
+opacity: 0;
+transform: translateY(24px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.scroll-reveal.visible {
+opacity: 1;
+transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-card, .scroll-reveal {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+</style>
+</head>
+<body class="font-sans antialiased bg-[#F1EFE8] text-[#2C2C2A] dark:bg-[#0B1A2B] dark:text-[#E6F1FB] transition-colors duration-300">
+<!-- HEADER -->
+<header class="bg-[#042C53] text-white sticky top-0 z-50 shadow-lg">
+<div class="max-w-7xl mx-auto">
+<nav class="px-6 lg:px-8 py-5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-[#D85A30] rounded-2xl flex items-center justify-center text-2xl">🚢</div>
+<div>
+<span class="text-2xl font-bold tracking-tight">Transit</span>
+<span class="text-2xl font-bold tracking-tight text-[#EF9F27]">Flow</span>
+</div>
+</div>
+<div class="hidden md:flex items-center gap-8 text-sm font-medium">
+<a href="#" class="nav-link hover:text-[#EF9F27]">Home</a>
+<a href="#" class="nav-link hover:text-[#EF9F27]">About Us</a>
+<a href="#services" class="nav-link hover:text-[#EF9F27]">Services</a>
+<a href="#" class="nav-link hover:text-[#EF9F27]">Projects</a>
+<a href="#" class="nav-link hover:text-[#EF9F27]">Contact</a>
+<a href="#" class="nav-link hover:text-[#EF9F27]">Pricing</a>
+<a href="#" class="nav-link hover:text-[#EF9F27]">Dashboard</a>
+</div>
+<div class="flex items-center gap-4">
+<button onclick="toggleDarkMode()" aria-label="Toggle dark mode" class="p-3 rounded-2xl hover:bg-white/10 transition">
+<i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
+</button>
+<button onclick="requestQuote()" class="bg-[#D85A30] hover:bg-[#BA7517] text-white px-8 py-3 rounded-2xl font-semibold transition">
+                        Get Quote
+</button>
+<button id="mobile-menu-btn" aria-label="Open menu" class="md:hidden text-3xl p-2">
+<i class="fa-solid fa-bars"></i>
+</button>
+</div>
+</nav>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="mobile-menu hidden md:hidden bg-[#042C53] py-6 px-6">
+<div class="flex flex-col gap-6 text-lg font-medium">
+<a href="#" class="nav-link py-2">Home</a>
+<a href="#" class="nav-link py-2">About Us</a>
+<a href="#services" class="nav-link py-2">Services</a>
+<a href="#" class="nav-link py-2">Projects</a>
+<a href="#" class="nav-link py-2">Contact</a>
+</div>
+</div>
+</header>
+<!-- HERO -->
+<section class="hero-bg min-h-screen flex items-center relative text-white overflow-hidden">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-20 md:py-0 grid md:grid-cols-2 gap-12 items-center min-h-[calc(100vh-80px)]">
+<div class="space-y-8 scroll-reveal">
+<div class="inline-flex items-center gap-2 glass px-6 py-3 rounded-3xl text-sm">
+<span class="w-2 h-2 bg-[#EF9F27] rounded-full animate-pulse"></span>
+                    Trusted Worldwide
+</div>
+<h1 class="text-5xl sm:text-6xl md:text-6xl lg:text-7xl font-bold leading-[1.05]">
+                    Moving the World<br>with <span class="text-[#EF9F27]">Speed &amp; Trust</span>
+</h1>
+<p class="text-lg md:text-xl text-[#E6F1FB] max-w-lg">
+                    Reliable global logistics powered by technology, integrity, and a fleet that never stops.
+</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button onclick="exploreMore()" class="bg-[#D85A30] hover:bg-[#BA7357] px-10 py-5 rounded-2xl font-semibold text-lg transition flex items-center justify-center gap-3">
+                        Explore Solutions
+<i class="fa-solid fa-arrow-right"></i>
+</button>
+</div>
+</div>
+<div class="hidden md:flex justify-end relative scroll-reveal">
+<div class="glass-frame rounded-3xl p-4 max-w-md">
+<img
+src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=1200&auto=format&fit=crop"
+alt="Transport truck on a highway"
+class="rounded-2xl w-full h-80 object-cover"
+loading="lazy"
+>
+</div>
+</div>
+</div>
+</section>
+<!-- SERVICES -->
+<section id="services" class="py-20 md:py-24 bg-white dark:bg-[#0F2338]">
+<div class="max-w-7xl mx-auto px-6 lg:px-8">
+<div class="text-center mb-16 scroll-reveal">
+<span class="inline-block bg-[#E6F1FB] text-[#185FA5] dark:bg-[#0C447C] dark:text-[#E6F1FB] text-sm font-medium px-6 py-2 rounded-full mb-4">OUR EXPERTISE</span>
+<h2 class="text-4xl md:text-5xl font-bold text-[#042C53] dark:text-white">Solutions That Deliver</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+<div class="service-card bg-white dark:bg-[#12283F] border border-[#D3D1C7] dark:border-white/10 rounded-3xl p-8 group scroll-reveal">
+<div class="text-5xl mb-6">🛡️</div>
+<h3 class="text-2xl font-semibold mb-3 dark:text-white">Secure Transport</h3>
+<p class="text-[#888780] dark:text-[#B4B2A9]">Real-time tracking with GPS monitoring.</p>
+</div>
+<div class="service-card bg-white dark:bg-[#12283F] border border-[#D3D1C7] dark:border-white/10 rounded-3xl p-8 group scroll-reveal">
+<div class="text-5xl mb-6">🚢</div>
+<h3 class="text-2xl font-semibold mb-3 dark:text-white">Ocean Freight</h3>
+<p class="text-[#888780] dark:text-[#B4B2A9]">Global container shipping with optimized routes.</p>
+</div>
+<div class="service-card bg-white dark:bg-[#12283F] border border-[#D3D1C7] dark:border-white/10 rounded-3xl p-8 group scroll-reveal">
+<div class="text-5xl mb-6">📦</div>
+<h3 class="text-2xl font-semibold mb-3 dark:text-white">Smart Warehousing</h3>
+<p class="text-[#888780] dark:text-[#B4B2A9]">AI-powered inventory &amp; distribution centers.</p>
+</div>
+<div class="service-card bg-white dark:bg-[#12283F] border border-[#D3D1C7] dark:border-white/10 rounded-3xl p-8 group scroll-reveal">
+<div class="text-5xl mb-6">✈️</div>
+<h3 class="text-2xl font-semibold mb-3 dark:text-white">Air Express</h3>
+<p class="text-[#888780] dark:text-[#B4B2A9]">Fastest delivery across continents.</p>
+</div>
+<div class="service-card bg-white dark:bg-[#12283F] border border-[#D3D1C7] dark:border-white/10 rounded-3xl p-8 group scroll-reveal">
+<div class="text-5xl mb-6">🚚</div>
+<h3 class="text-2xl font-semibold mb-3 dark:text-white">Last Mile</h3>
+<p class="text-[#888780] dark:text-[#B4B2A9]">Reliable local delivery network.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- STATS -->
+<section id="stats" class="py-16 bg-[#042C53] text-white">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-10 text-center">
+<div class="scroll-reveal">
+<div id="clients" class="counter text-5xl font-bold text-[#EF9F27]">0</div>
+<div class="text-[#E6F1FB]">Happy Clients</div>
+</div>
+<div class="scroll-reveal">
+<div id="countries" class="counter text-5xl font-bold text-[#EF9F27]">0</div>
+<div class="text-[#E6F1FB]">Countries Served</div>
+</div>
+<div class="scroll-reveal">
+<div id="shipments" class="counter text-5xl font-bold text-[#EF9F27]">0</div>
+<div class="text-[#E6F1FB]">Shipments Delivered</div>
+</div>
+<div class="scroll-reveal">
+<div id="years" class="counter text-5xl font-bold text-[#EF9F27]">0</div>
+<div class="text-[#E6F1FB]">Years of Excellence</div>
+</div>
+</div>
+</section>
+<script>
+// ---- Dark mode ----
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  const icon = document.getElementById('theme-icon');
+  icon.classList.toggle('fa-moon', !isDark);
+  icon.classList.toggle('fa-sun', isDark);
+  localStorage.theme = isDark ? 'dark' : 'light';
+}
+
+function syncThemeIcon() {
+  const isDark = document.documentElement.classList.contains('dark');
+  const icon = document.getElementById('theme-icon');
+  icon.classList.toggle('fa-moon', !isDark);
+  icon.classList.toggle('fa-sun', isDark);
+}
+
+// ---- Button placeholders (wire up to real destinations as needed) ----
+function requestQuote() {
+  console.log('Quote requested');
+}
+function exploreMore() {
+  document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ---- Animated counters ----
+function animateCounter(id, target, duration = 2000) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  let start = 0;
+  const increment = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += increment;
+    if (start >= target) {
+      element.textContent = target + (id === 'years' ? '' : '+');
+      clearInterval(timer);
+    } else {
+      element.textContent = Math.floor(start) + '+';
+    }
+  }, 16);
+}
+
+// ---- Scroll reveal ----
+function handleScroll() {
+  document.querySelectorAll('.scroll-reveal').forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.85) {
+      el.classList.add('visible');
+    }
+  });
+}
+
+// ---- Mobile menu ----
+document.addEventListener('DOMContentLoaded', () => {
+  syncThemeIcon();
+
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  mobileBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Trigger counters once the stats section is visible
+  const statsSection = document.getElementById('stats');
+  if (statsSection && 'IntersectionObserver' in window) {
+    const statsObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateCounter('clients', 500);
+          animateCounter('countries', 120);
+          animateCounter('shipments', 12480);
+          animateCounter('years', 16);
+          statsObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.5 });
+    statsObserver.observe(statsSection);
+  } else {
+    // Fallback if IntersectionObserver is unavailable
+    animateCounter('clients', 500);
+    animateCounter('countries', 120);
+    animateCounter('shipments', 12480);
+    animateCounter('years', 16);
+  }
+
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+
+  console.log('%cTransitFlow - Smart Transport Experience Ready 🚢', 'color: #D85A30; font-size: 16px; font-weight: bold;');
+});
+</script>
+</body>
+</html>
