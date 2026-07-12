@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Management Dashboard - TransitOps</title>
+    <script>
+        const initStorage = () => {
+            if (!localStorage.getItem('transitops_db')) {
+                const initialData = {
+                    users: [],
+                    vehicles: [
+                        { id: "V001", regNo: "VAN-05", name: "Ford Transit Van-05", type: "Van", maxLoad: 500, odometer: 12000, acqCost: 25000, status: "Available" }
+                    ],
+                    drivers: [
+                        { id: "DRV-1", name: "Alex Jones", licenseNo: "DL-98765", category: "Heavy Freight", expiry: "2027-12-31", phone: "555-0192", safetyScore: 95, status: "Available" }
+                    ],
+                    trips: [],
+                    maintenance: [],
+                    expenses: []
+                };
+                localStorage.setItem('transitops_db', JSON.stringify(initialData));
+            }
+        };
+        initStorage();
+
+        window.getDB = function() { 
+            return JSON.parse(localStorage.getItem('transitops_db')); 
+        };
+        window.saveDB = function(data) { 
+            localStorage.setItem('transitops_db', JSON.stringify(data)); 
+        };
+    </script>
+    <style>
+        :root {
+            --primary-900: #042C53;
+            --primary-800: #0C447C;
+            --primary-600: #185FA5;
+            --primary-400: #378ADD;
+            --primary-50: #E6F1FB;
+            --accent: #D85A30;
+            --accent-light: #EF9F27;
+            --text-dark: #1e293b;
+            --bg-light: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* Sidebar Layout */
+        .sidebar {
+            width: 260px;
+            background: var(--primary-900);
+            color: white;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 32px 0;
+            font-size: 24px;
+            color: #ffffff;
+            border-bottom: 2px solid var(--primary-800);
+            padding-bottom: 15px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: var(--primary-50);
+            padding: 12px 16px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        /* Main Workspace Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .header-panel h1 {
+            margin: 0;
+            color: var(--primary-900);
+            font-size: 28px;
+        }
+
+        /* Registration Form Styles */
+        .card-panel {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .card-panel h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary-800);
+            font-size: 18px;
+            border-left: 4px solid var(--accent);
+            padding-left: 10px;
+        }
+
+        .driver-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-800);
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 3px var(--primary-50);
+        }
+
+        .btn-submit {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            grid-column: 1 / -1;
+            justify-self: end;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-light);
+        }
+
+        /* Live Dashboard Table Details */
+        .table-responsive {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: var(--primary-800);
+            color: white;
+            padding: 16px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-available { background: #d1fae5; color: #065f46; }
+        .badge-ontrip { background: #e0f2fe; color: #0369a1; }
+        .badge-offduty { background: #f1f5f9; color: #475569; }
+        .badge-suspended { background: #fee2e2; color: #991b1b; }
+
+        .status-select {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <div class="w-10 h-10 bg-[#D85A30] rounded-2xl flex items-center justify-center text-2xl">🚢</div>
+
+    <div class="sidebar">
+        <h2>TransitOps</h2>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="fleet.html">Vehicle Registry</a>
+        <a href="drivers.html" class="active">Driver Directory</a>
+        <a href="trips.html">Trip Dispatch</a>
+        <a href="expenses.html">Expenses & ROI</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header-panel">
+            <h1>Driver Management Control Center</h1>
+            <div><strong>System View:</strong> Admin Dashboard</div>
+        </div>
+
+        <div class="card-panel">
+            <h3>Onboard New Operator Profile</h3>
+            <form id="driverRegisterForm" class="driver-form">
+                <div class="form-group">
+                    <label for="driverName">Full Name</label>
+                    <input type="text" id="driverName" placeholder="Alex Jones" required>
+                </div>
+                <div class="form-group">
+                    <label for="licenseNo">License Number</label>
+                    <input type="text" id="licenseNo" placeholder="DL-98765" required>
+                </div>
+                <div class="form-group">
+                    <label for="licenseCategory">License Category</label>
+                    <select id="licenseCategory" required>
+                        <option value="Commercial (Class A)">Commercial (Class A)</option>
+                        <option value="Commercial (Class B)">Commercial (Class B)</option>
+                        <option value="Heavy Freight">Heavy Freight</option>
+                        <option value="Light Transport">Light Transport</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expiryDate">License Expiry Date</label>
+                    <input type="date" id="expiryDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactNo">Contact Number</label>
+                    <input type="tel" id="contactNo" placeholder="555-0192" required>
+                </div>
+                <div class="form-group">
+                    <label for="safetyScore">Safety Score (0-100)</label>
+                    <input type="number" id="safetyScore" placeholder="100" min="0" max="100" required>
+                </div>
+                <button type="submit" class="btn-submit">Register Driver Profile</button>
+            </form>
+        </div>
+
+        <h2>Active Operators Matrix Dashboard</h2>
+        <div class="table-responsive">
+            <table id="driversTable">
+                <thead>
+                    <tr>
+                        <th>Operator Name</th>
+                        <th>License Number</th>
+                        <th>Category</th>
+                        <th>Expiry Date</th>
+                        <th>Contact</th>
+                        <th>Safety Rating</th>
+                        <th>Status</th>
+                        <th>Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Draw details straight onto dashboard rows dynamically
+        const renderDriversTable = () => {
+            const db = getDB();
+            const tbody = document.querySelector('#driversTable tbody');
+            tbody.innerHTML = '';
+            
+            if(!db.drivers || db.drivers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#64748b; padding: 20px;">No driver profiles registered yet.</td></tr>`;
+                return;
+            }
+
+            db.drivers.forEach((driver) => {
+                let badgeClass = 'badge-offduty';
+                if(driver.status === 'Available') badgeClass = 'badge-available';
+                if(driver.status === 'On Trip') badgeClass = 'badge-ontrip';
+                if(driver.status === 'Suspended') badgeClass = 'badge-suspended';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${driver.name}</strong></td>
+                        <td><code>${driver.licenseNo}</code></td>
+                        <td>${driver.category}</td>
+                        <td>${driver.expiry}</td>
+                        <td>${driver.phone}</td>
+                        <td>⭐ <b>${driver.safetyScore}</b>/100</td>
+                        <td><span class="badge ${badgeClass}">${driver.status}</span></td>
+                        <td>
+                            <select class="status-select" onchange="updateDriverStatus('${driver.id}', this.value)">
+                                <option value="Available" ${driver.status === 'Available' ? 'selected' : ''}>Available</option>
+                                <option value="On Trip" ${driver.status === 'On Trip' ? 'selected' : ''}>On Trip</option>
+                                <option value="Off Duty" ${driver.status === 'Off Duty' ? 'selected' : ''}>Off Duty</option>
+                                <option value="Suspended" ${driver.status === 'Suspended' ? 'selected' : ''}>Suspended</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Complete form interception execution block 
+        document.getElementById('driverRegisterForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const db = getDB();
+
+            const newDriver = {
+                id: 'DRV-' + Date.now(),
+                name: document.getElementById('driverName').value,
+                licenseNo: document.getElementById('licenseNo').value.toUpperCase(),
+                category: document.getElementById('licenseCategory').value,
+                expiry: document.getElementById('expiryDate').value,
+                phone: document.getElementById('contactNo').value,
+                safetyScore: parseInt(document.getElementById('safetyScore').value) || 100,
+                status: 'Available'
+            };
+
+            if (!db.drivers) db.drivers = [];
+            db.drivers.push(newDriver);
+            saveDB(db);
+
+            // Give a complete feedback alert box confirmation window 
+            alert(`SUCCESS: Account Successfully Made!\n${newDriver.name} is now tracked live on the Dashboard below.`);
+            
+            // Instantly sync the visual data display array table records layout 
+            renderDriversTable();
+            e.target.reset();
+        });
+
+        // Dropdown tracking status adjustment engine logic
+        window.updateDriverStatus = (driverId, newStatus) => {
+            const db = getDB();
+            const selectedDriver = db.drivers.find(d => d.id === driverId);
+            if (selectedDriver) {
+                selectedDriver.status = newStatus;
+                saveDB(db);
+                renderDriversTable(); 
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', renderDriversTable);
+    </script>
+</body>
+</html>
